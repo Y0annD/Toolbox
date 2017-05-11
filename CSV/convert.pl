@@ -27,8 +27,7 @@ my $MODE_STREAM = "STREAM";
 # Read the write
 my $MODE_BULK   = "BULK";
 
-
-
+my $mode = $MODE_STREAM;
 
 # check that we have at least a file to convert
 if( @ARGV < 1) {
@@ -36,6 +35,10 @@ if( @ARGV < 1) {
     exit(-1);
 }
 
+########
+## Read options from command line
+########
+GetOptions ('quiet|q' => \$quiet, 'stream|s' => sub {$mode = $MODE_STREAM}, 'bulk|b' => sub { $mode = $MODE_BULK});
 
 if(!$quiet) {
     print "File ".$ARGV[0] ." will be converted\n";
@@ -45,13 +48,12 @@ if(!$quiet) {
 my $filename = $ARGV[0];
 my $outfile  = $ARGV[0] .".out";
 
-my $mode = $MODE_BULK;
 convertFile($filename, $mode);
 
 
 
 if(!$quiet) {
-    print "File $filename has been converted in $outfile\n";
+    print "File $filename has been converted in $outfile in mode ". $mode . "\n";
 }
 
 sub convertFile {
