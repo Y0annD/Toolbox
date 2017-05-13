@@ -11,8 +11,8 @@ use Getopt::Long;
 #########################################
 
 # separators
-my $initialSeparator = ";";
-my $futureSeparator  = ",";
+my $initialSeparator = ",";
+my $futureSeparator  = ";";
 
 # quiet mode
 my $quiet = 0;
@@ -29,24 +29,30 @@ my $MODE_BULK   = "BULK";
 
 my $mode = $MODE_STREAM;
 
+# files
+my $filename;
+my $outfile;
+
 # check that we have at least a file to convert
 if( @ARGV < 1) {
-    print "Usage: $0 <options> filenameToConvert\nOptions: \n\t-b: bulk mode (read, then write)\n\t-s: stream mode (read and write) [default]";
+    help();
     exit(-1);
 }
 
 ########
 ## Read options from command line
 ########
-GetOptions ('quiet|q' => \$quiet, 'stream|s' => sub {$mode = $MODE_STREAM}, 'bulk|b' => sub { $mode = $MODE_BULK});
+GetOptions ('quiet|q' => \$quiet, 'stream|s' => sub {$mode = $MODE_STREAM}, 'bulk|b' => sub { $mode = $MODE_BULK}, 'out|o=s' => \$outfile);
 
 if(!$quiet) {
     print "File ".$ARGV[0] ." will be converted\n";
 }
 
 # Manage file names
-my $filename = $ARGV[0];
-my $outfile  = $ARGV[0] .".out";
+$filename = $ARGV[0];
+if(!$outfile) {
+    $outfile = $ARGV[0].".out";
+}
 
 convertFile($filename, $mode);
 
@@ -88,5 +94,19 @@ sub convertFile {
 sub convertLine {
     my ($line) = @_;
     $line =~ s/$initialSeparator/$futureSeparator/ig;
+    $line =~ s/\./\,/ig;
     return $line;
+}
+
+
+sub help {
+    print "Usage: $0 <options> filenameToConvert\n";
+    print "Options: \n";
+    print "\t-b: bulk mode (read, then write)\n";
+    print "\t-s: stream mode (read and write) [default]\n";
+    print "\t-[out|o]=outputFile\n";
+
+    print "\nExamples:\n";
+    print "\t perl ". $0 ." file.csv\n";
+    print "\t perl ". $0 . " -o=out.csv -b file.csv\n";
 }
